@@ -4,6 +4,9 @@ android {
     compileSdkVersion 30
     buildToolsVersion "30.0.1"
 
+    aaptOptions {
+        noCompress "pdf"
+    }
     defaultConfig {
         applicationId "com.example.myapplication"
         minSdkVersion 22
