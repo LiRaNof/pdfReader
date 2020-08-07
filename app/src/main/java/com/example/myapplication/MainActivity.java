@@ -9,6 +9,7 @@ import androidx.core.content.FileProvider;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,11 +35,19 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 public class MainActivity extends AppCompatActivity {
     private int REQUEST_CODE_PERMISSION = 0x01;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+/*        if(!Environment.isExternalStorageManager()){
+            Intent intent = new Intent();
+            intent.setAction(android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION );
+            startActivity(intent);
+        }
+
+ */
         int permissionCheck = ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE);
         if (permissionCheck == PERMISSION_GRANTED) {
             Log.d("debug", "permission is granted");
@@ -76,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
                 }else{
                     Log.d("debug", "permission is not granted");
                 }
-
+               //File sdcard=null;
                 File sdcard = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) ;
                 Log.d("debug", sdcard.getAbsolutePath());
                 ParcelFileDescriptor fd = null;
@@ -92,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
                     ContentResolver cr = getContentResolver();
 
                     fd= cr.openFileDescriptor(uri, "r");
-                   // fd = ParcelFileDescriptor.open(), ParcelFileDescriptor.MODE_READ_ONLY);
+                    //fd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
                     renderer = new PdfRenderer(fd);
                     page = renderer.openPage(0);
 
