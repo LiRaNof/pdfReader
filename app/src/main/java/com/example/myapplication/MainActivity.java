@@ -38,8 +38,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //　アクティビティが生成されたときに呼ばれるコールバック関数
+
         super.onCreate(savedInstanceState);
+        //　継承元である AppCompatActivity　の生成時コールバックの挙動を継承　
         setContentView(R.layout.activity_main);
+        //　ビューの配置
 
 /*        if(!Environment.isExternalStorageManager()){
             Intent intent = new Intent();
@@ -49,15 +53,20 @@ public class MainActivity extends AppCompatActivity {
 
  */
         int permissionCheck = ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE);
+        //　READ_EXTERNAL_STORAGE　が許可されているかどうかをチェック
+
         if (permissionCheck == PERMISSION_GRANTED) {
+            //　READ_EXTERNAL_STORAGEが許可されていた場合
             Log.d("debug", "permission is granted");
         } else if (ActivityCompat.shouldShowRequestPermissionRationale(this, READ_EXTERNAL_STORAGE)) {
+            // READ_EXTERNAL_STORAGEが不許可で、許可を求める理由を表示をしてもよい場合。
             new AlertDialog.Builder(this)
                     .setTitle("パーミッションの追加説明")
                     .setMessage("このアプリを利用するにはパーミッションが必要です")
                     .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            //　はいボタンの動作（許可申請）
                             ActivityCompat.requestPermissions(MainActivity.this,
                                     new String[]{READ_EXTERNAL_STORAGE},
                                     REQUEST_CODE_PERMISSION);
@@ -66,27 +75,32 @@ public class MainActivity extends AppCompatActivity {
                     .create()
                     .show();
         } else {
+            // READ_EXTERNAL_STORAGEが不許可で、許可を求める理由を表示をしてはいけない場合。
             ActivityCompat.requestPermissions(this, new String[]{
-                            READ_EXTERNAL_STORAGE
-                    },
-                    REQUEST_CODE_PERMISSION);
-
+                    READ_EXTERNAL_STORAGE}, REQUEST_CODE_PERMISSION);
         }
 
 
         final ImageView image1 = findViewById(R.id.imageView);
+        //　IDからimageviewを取得
         image1.setOnClickListener(new View.OnClickListener() {
+            //クリックされたときのイベントハンドラ
             @RequiresApi(api = Build.VERSION_CODES.M)
             public void onClick(View view) {
+                //クリックされたときに呼ばれるコールバック
+
+                // **** デバッグ用表示　****
                 Log.d("debug", "button1, Perform action on click");
                 int permissionCheck = ContextCompat.checkSelfPermission(MainActivity.this, READ_EXTERNAL_STORAGE);
                 if (permissionCheck == PERMISSION_GRANTED) {
                     Log.d("debug", "permission is granted");
-                }else{
+                } else {
                     Log.d("debug", "permission is not granted");
                 }
-               //File sdcard=null;
-                File sdcard = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) ;
+                // **** デバッグ用表示　****
+
+                //File sdcard=null;
+                File sdcard = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
                 Log.d("debug", sdcard.getAbsolutePath());
                 ParcelFileDescriptor fd = null;
                 PdfRenderer renderer = null;
@@ -95,12 +109,12 @@ public class MainActivity extends AppCompatActivity {
                     //sdcard =MainActivity.this.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
                     Log.d("debug", sdcard.getAbsolutePath());
                     // SDカード直下からtest.pdfを読み込み、1ページ目を取得
-                    File file =new File(sdcard, "test.pdf");
-                    Uri uri=FileProvider.getUriForFile(MainActivity.this, BuildConfig.APPLICATION_ID + ".provider", file);
+                    File file = new File(sdcard, "test.pdf");
+                    Uri uri = FileProvider.getUriForFile(MainActivity.this, BuildConfig.APPLICATION_ID + ".provider", file);
 
                     ContentResolver cr = getContentResolver();
 
-                    fd= cr.openFileDescriptor(uri, "r");
+                    fd = cr.openFileDescriptor(uri, "r");
                     //fd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
                     renderer = new PdfRenderer(fd);
                     page = renderer.openPage(0);
