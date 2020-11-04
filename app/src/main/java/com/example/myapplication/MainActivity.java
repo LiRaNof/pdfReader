@@ -37,13 +37,14 @@ public class MainActivity extends AppCompatActivity {
 
 
     @Override
+    //　アクティビティが生成されたときに呼ばれるコールバック関数
     protected void onCreate(Bundle savedInstanceState) {
-        //　アクティビティが生成されたときに呼ばれるコールバック関数
 
-        super.onCreate(savedInstanceState);
         //　継承元である AppCompatActivity　の生成時コールバックの挙動を継承　
-        setContentView(R.layout.activity_main);
+        super.onCreate(savedInstanceState);
         //　ビューの配置
+        setContentView(R.layout.activity_main);
+
 
 /*        if(!Environment.isExternalStorageManager()){
             Intent intent = new Intent();
@@ -52,21 +53,26 @@ public class MainActivity extends AppCompatActivity {
         }
 
  */
-        int permissionCheck = ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE);
-        //　READ_EXTERNAL_STORAGE　が許可されているかどうかをチェック
 
+        //　READ_EXTERNAL_STORAGE　が許可されているかどうかをチェック
+        int permissionCheck = ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE);
+
+        //　READ_EXTERNAL_STORAGEが許可されていた場合
         if (permissionCheck == PERMISSION_GRANTED) {
-            //　READ_EXTERNAL_STORAGEが許可されていた場合
+
             Log.d("debug", "permission is granted");
-        } else if (ActivityCompat.shouldShowRequestPermissionRationale(this, READ_EXTERNAL_STORAGE)) {
+
             // READ_EXTERNAL_STORAGEが不許可で、許可を求める理由を表示をしてもよい場合。
+        } else if (ActivityCompat.shouldShowRequestPermissionRationale(this, READ_EXTERNAL_STORAGE)) {
+
             new AlertDialog.Builder(this)
                     .setTitle("パーミッションの追加説明")
                     .setMessage("このアプリを利用するにはパーミッションが必要です")
+                    //　はいボタンの動作（許可申請）
                     .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            //　はいボタンの動作（許可申請）
+
                             ActivityCompat.requestPermissions(MainActivity.this,
                                     new String[]{READ_EXTERNAL_STORAGE},
                                     REQUEST_CODE_PERMISSION);
@@ -74,20 +80,22 @@ public class MainActivity extends AppCompatActivity {
                     })
                     .create()
                     .show();
-        } else {
             // READ_EXTERNAL_STORAGEが不許可で、許可を求める理由を表示をしてはいけない場合。
+        } else {
+
             ActivityCompat.requestPermissions(this, new String[]{
                     READ_EXTERNAL_STORAGE}, REQUEST_CODE_PERMISSION);
         }
 
 
-        final ImageView image1 = findViewById(R.id.imageView);
         //　IDからimageviewを取得
+        final ImageView image1 = findViewById(R.id.imageView);
+        //クリックされたときのイベントハンドラ
         image1.setOnClickListener(new View.OnClickListener() {
-            //クリックされたときのイベントハンドラ
+            //クリックされたときに呼ばれるコールバック
             @RequiresApi(api = Build.VERSION_CODES.M)
             public void onClick(View view) {
-                //クリックされたときに呼ばれるコールバック
+
 
                 // **** デバッグ用表示　****
                 Log.d("debug", "button1, Perform action on click");
@@ -99,24 +107,46 @@ public class MainActivity extends AppCompatActivity {
                 }
                 // **** デバッグ用表示　****
 
-                //File sdcard=null;
+
+                // **ファイル読み込み部分**
+
+                // 外部ディレクトリへのFileの取得　(API 29では使用不可？？)
                 File sdcard = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                // デバッグ用表示
                 Log.d("debug", sdcard.getAbsolutePath());
+
+
+
                 ParcelFileDescriptor fd = null;
                 PdfRenderer renderer = null;
                 PdfRenderer.Page page = null;
                 try {
+
+                    //　デバッグ用表示
                     //sdcard =MainActivity.this.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
                     Log.d("debug", sdcard.getAbsolutePath());
-                    // SDカード直下からtest.pdfを読み込み、1ページ目を取得
+
+
+                    // *** SDカード直下からtest.pdfを読み込み、1ページ目を取得 ***
+
+                    //PDFのアドレスをFileとして取得
                     File file = new File(sdcard, "test.pdf");
+
+                    //ファイルプロバイダにURI を問い合わせ
                     Uri uri = FileProvider.getUriForFile(MainActivity.this, BuildConfig.APPLICATION_ID + ".provider", file);
 
+                    //ContentResolver を生成
                     ContentResolver cr = getContentResolver();
 
+                    //ContentResolverから FileDescriptorを取得
                     fd = cr.openFileDescriptor(uri, "r");
+
                     //fd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+
+                    // pdrRendererにFileDescriptor を接続
                     renderer = new PdfRenderer(fd);
+
+                    // pdrRendererでpageを描画
                     page = renderer.openPage(0);
 
                     ImageView image = (ImageView) view;
@@ -124,6 +154,8 @@ public class MainActivity extends AppCompatActivity {
                     int viewHeight = image.getHeight();
                     float pdfWidth = page.getWidth();
                     float pdfHeight = page.getHeight();
+
+                    //　デバッグ用表示
                     Log.i("test", "viewWidth=" + viewWidth + ", viewHeight=" + viewHeight
                             + ", pdfWidth=" + pdfWidth + ", pdfHeight=" + pdfHeight);
 
