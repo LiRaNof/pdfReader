@@ -8,24 +8,31 @@ import androidx.core.content.FileProvider;
 
 import android.app.AlertDialog;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.pdf.PdfRenderer;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
@@ -34,6 +41,113 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class MainActivity extends AppCompatActivity {
     private int REQUEST_CODE_PERMISSION = 0x01;
+
+   static public class FileInfo implements Comparable<FileInfo> {
+        private String m_strName;
+        private File m_file;
+
+        public FileInfo(String strName, File file) {
+            m_strName = strName;
+            m_file = file;
+
+        }
+
+        public String getName() {
+            return m_strName;
+        }
+
+        public File getFile() {
+            return m_file;
+        }
+
+        public int compareTo(FileInfo another) {
+            if (true == m_file.isDirectory() && false == another.getFile().isDirectory()) {
+                return -1;
+            }
+            if (false == m_file.isDirectory() && true == another.getFile().isDirectory()) {
+                return 1;
+            }
+            return m_file.getName().toLowerCase().compareTo(another.getFile().getName().toLowerCase());
+        }
+    }
+
+    static public class FileInfoArrayAdapter extends BaseAdapter {
+        private List<FileInfo> m_listFileInfo; // ファイル情報リスト
+        private Context m_context;
+        public FileInfoArrayAdapter(Context context,
+                                    List<FileInfo> list) {
+            super();
+            m_context = context;
+            m_listFileInfo = list;
+        }
+
+        @Override
+        public int getCount() {
+            return m_listFileInfo.size();
+        }
+
+
+        @Override
+        public FileInfo getItem(int position) {
+            return m_listFileInfo.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return  position;
+        }
+
+        static class ViewHolder{
+            TextView textviewFileName;
+            TextView textviewFileSize;
+        }
+        @Override
+        public View getView(int position,
+                            View convertView,
+                            ViewGroup parent) {
+            // レイアウトの生成
+            ViewHolder viewHolder;
+            if (null == convertView) {
+
+                // レイアウト
+                LinearLayout layout = new LinearLayout( m_context );
+                layout.setOrientation( LinearLayout.VERTICAL );
+                layout.setLayoutParams( new LinearLayout.LayoutParams( LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT ) );
+                // ファイル名テキスト
+                TextView textviewFileName = new TextView( m_context );
+                textviewFileName.setTextSize( TypedValue.COMPLEX_UNIT_DIP, 24 );
+                layout.addView( textviewFileName, new LinearLayout.LayoutParams( LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT ) );
+                // ファイルサイズテキスト
+                TextView textviewFileSize = new TextView( m_context );
+                textviewFileSize.setTextSize( TypedValue.COMPLEX_UNIT_DIP, 12 );
+                layout.addView( textviewFileSize, new LinearLayout.LayoutParams( LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT ) );
+
+                convertView = layout;
+                viewHolder = new ViewHolder();
+                viewHolder.textviewFileName = textviewFileName;
+                viewHolder.textviewFileSize = textviewFileSize;
+                convertView.setTag( viewHolder );
+            }
+            else
+            {
+                viewHolder = (ViewHolder)convertView.getTag();
+            }
+
+            FileInfo fileinfo = m_listFileInfo.get( position );
+            if( fileinfo.getFile().isDirectory() )
+            { // ディレクトリの場合は、名前の後ろに「/」を付ける
+                viewHolder.textviewFileName.setText( fileinfo.getName() + "/" );
+                viewHolder.textviewFileSize.setText( "(directory)" );
+            }
+            else
+            {
+                viewHolder.textviewFileName.setText( fileinfo.getName() );
+                viewHolder.textviewFileSize.setText( String.valueOf( fileinfo.getFile().length() / 1024 ) + " [KB]" );
+            }
+
+            return convertView;
+        }
+    }
 
 
     @Override
