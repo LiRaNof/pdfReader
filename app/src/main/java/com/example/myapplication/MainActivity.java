@@ -20,6 +20,7 @@ import android.widget.ImageView;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 
 import android.graphics.Bitmap;
 import android.graphics.Rect;
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         //　READ_EXTERNAL_STORAGEが許可されていた場合
         if (permissionCheck == PERMISSION_GRANTED) {
 
-            Log.d("debug", "permission is granted");
+            Log.d("debug", "READ_EXTERNAL_STORAGE permission is granted");
 
             // READ_EXTERNAL_STORAGEが不許可で、許可を求める理由を表示をしてもよい場合。
         } else if (ActivityCompat.shouldShowRequestPermissionRationale(this, READ_EXTERNAL_STORAGE)) {
@@ -101,19 +102,27 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("debug", "button1, Perform action on click");
                 int permissionCheck = ContextCompat.checkSelfPermission(MainActivity.this, READ_EXTERNAL_STORAGE);
                 if (permissionCheck == PERMISSION_GRANTED) {
-                    Log.d("debug", "permission is granted");
+                    Log.d("debug", "permission is granted in clickListener");
                 } else {
-                    Log.d("debug", "permission is not granted");
+                    Log.d("debug", "permission is not granted in clickListener");
                 }
                 // **** デバッグ用表示　****
+
+
 
 
                 // **ファイル読み込み部分**
 
                 // 外部ディレクトリへのFileの取得　(API 29では使用不可？？)
-                File sdcard = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                File sdcard = Environment.getExternalStorageDirectory();
                 // デバッグ用表示
                 Log.d("debug", sdcard.getAbsolutePath());
+
+                File[] filelist = sdcard.listFiles();
+                for (int i=0;i<filelist.length;i++){
+                    Log.d("debug", filelist[i].toString()+"/n");
+                }
+
 
 
 
@@ -167,6 +176,8 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         viewWidth = (int) Math.ceil(pdfWidth * hRatio);
                     }
+
+                    //　デバッグ用表示
                     Log.i("test", "drawWidth=" + viewWidth + ", drawHeight=" + viewHeight);
 
                     // Bitmap生成して描画
